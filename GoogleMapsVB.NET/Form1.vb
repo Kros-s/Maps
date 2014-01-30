@@ -10,7 +10,7 @@ Public Class Form1
         ''Creamos variable para almacenar la url
         Dim urlMaps As String
         ''Concatenamos la dirección con el Textbox añadimos la última sentencia para indicar que sólo se muestre el mapa
-        '' '' ''urlMaps = "http://localhost:3494/Mapa/Default.aspx"
+        '' '' ''urlMaps = "http://localhost:29479/Mapa/Default.aspx"
         urlMaps = "http://maps.google.es/maps?q=" & txtdireccion.Text & "&output=embed" 'Creamos una variable direccion para que el WebBrowser lo pueda abrir puesto que no puede abrir directamente un string
         Dim direccion As New Uri(urlMaps)
         'ASignamos como URL la direccion
@@ -100,7 +100,7 @@ Public Class Form1
     Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         Dim urlMaps As String
         'Concatenamos la dirección con el Textbox añadimos la última sentencia para indicar que sólo se muestre el mapa
-        urlMaps = "http://localhost:3494/Mapa/Default.aspx#"
+        urlMaps = "http://localhost:29479/Mapa/Default.aspx?opcion=Abrir&MapId=1"
 
         Dim direccion As New Uri(urlMaps)
         'ASignamos como URL la direccion
@@ -135,7 +135,7 @@ Public Class Form1
         ''End If
 
         'Concatenamos la dirección con el Textbox añadimos la última sentencia para indicar que sólo se muestre el mapa
-        urlMaps = "http://localhost:3494/Mapa/Default.aspx?latitud=" & txtlatitud.Text & "&longitud=" & txtlongitud.Text & "&Opcion=" & "Abrir" & "&Id_Map=" & ComboBox1.SelectedValue
+        urlMaps = "http://localhost:29479/Mapa/Default.aspx?latitud=" & txtlatitud.Text & "&longitud=" & txtlongitud.Text & "&Opcion=" & "Nuevo" & "&MapId=" & ComboBox1.SelectedValue
 
 
         Dim direccion1 As New Uri(urlMaps)
