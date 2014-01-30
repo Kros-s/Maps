@@ -36,7 +36,7 @@ public partial class _Default : System.Web.UI.Page
                     }
                     //Convertimos el metodo en formato para guardar en una sesion				
                     //Quiza sea mas facil pasar una variable a una funcion JS 			
-                    Session["Markers"] = openMaps(MapName);
+                   openMaps(MapName);
                     //showmarkers
                     //ClientScript.RegisterStartupScript(GetType(), "showmarkers", "showmarkers(" +openMaps(MapName)+");", true);
                 }
@@ -46,6 +46,32 @@ public partial class _Default : System.Web.UI.Page
                 }
 
 
+            }
+            if (Opcion == "Operacion")
+            {
+                Button1.Visible = false;
+                 string IdMaps = Request.QueryString["MapId"].ToString();
+                /*
+                 * Capturaremos el Id del Mapa y consultaremos la base de datos generando una sesion 
+                 * para poder manipular los elementos de los markers en formato JSON
+                 */
+                //Aqui solo obtenemos el nombre del mapa y lo enviamos a la funcion de abrir
+                try
+                {
+                    var dt = new DS_MapsMarkers.TableMarkerDataTable();
+                    var ta = new DS_MapsMarkersTableAdapters.TableMarkerTableAdapter();
+                    dt = ta.GetData(Convert.ToInt32(IdMaps));
+                    string MapName = "";
+                    foreach (DS_MapsMarkers.TableMarkerRow param in dt)
+                    {
+                        MapName = param["MapName"].ToString();
+                    }
+                    openMapsEditable(MapName);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
             if (Opcion == "Nuevo")
             {
@@ -70,6 +96,32 @@ public partial class _Default : System.Web.UI.Page
                 //ClientScript.RegisterStartupScript(GetType(), "addMarker", "addMarker("+ param1 + "," + param2+");", true);
             }
         }
+    }
+
+    private String openMapsEditable(String IdMap)
+    {
+        var dt = new DS_MapsMarkers.tbl_muDataTable();
+        var ta = new DS_MapsMarkersTableAdapters.tbl_muTableAdapter();
+        ta.Fill(dt, IdMap);
+
+        JavaScriptSerializer serializer = new JavaScriptSerializer();
+        List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
+        Dictionary<string, object> row;
+        foreach (DataRow dr in dt.Rows)
+        {
+            row = new Dictionary<string, object>();
+            foreach (DataColumn col in dt.Columns)
+            {
+                row.Add(col.ColumnName, dr[col]);
+            }
+            rows.Add(row);
+        }
+        var x = serializer.Serialize(rows);
+
+        ScriptManager.RegisterStartupScript(this, typeof(Page), "showMarkers", "showMarkers(" + x + ");", true);
+        return x;
+
+
     }
 
     private String openMaps(String IdMap)
@@ -137,7 +189,7 @@ public partial class _Default : System.Web.UI.Page
 
         }
     }
-
+    
     protected void btnSave_Click(object sender, EventArgs e)
     {
         txtMap.Visible = true;

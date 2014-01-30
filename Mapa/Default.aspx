@@ -11,6 +11,9 @@
         function showmeJson(json) {
             createJSON(json);
         }
+        function showMarkers(json) {
+            createJSONGEO(json);
+        }
         // of Bondi Beach in Sydney, Australia
         var markers = [];
         var geo = [];
@@ -25,7 +28,7 @@
             res.value = long + "," + lat;
             var res1 = document.getElementById('HiddenField2');
             res1.value = e.Id;
-            
+
             //         var l='';
             //         if (markers.length > 0) {
             //             for (var i = 0; i < markers.length; i++) {
@@ -215,6 +218,85 @@
 
             //       }
         }
+
+        function createJSONGEO(values) {
+            var jsonObj = [];
+            var mapOptions = {
+                zoom: 4,
+                center: new google.maps.LatLng(23.634501, -102.55278)
+            }
+            var map = new google.maps.Map(document.getElementById('map-canvas'),
+                                mapOptions);
+            $.each(values, function (index, ide) {
+                var item = {};
+                item["Geometry"] = {};
+                item["Geometry"]["Latitude"] = ide.Latitude;
+                item["Geometry"]["Longitude"] = ide.Longitude;
+                item["Geometry"]["Id"] = ide.ID_MU;
+                item["Geometry"]["Imagen"] = ide.Imagen;
+                item["Geometry"]["Status"] = ide.Status;
+                jsonObj.push(item);
+
+            });
+            var bounds = new window.google.maps.LatLngBounds();
+            var marker;
+            // extend bounds for each record
+            jQuery.each(jsonObj, function (key, val) {
+                var myLatlng = new window.google.maps.LatLng(val.Geometry.Latitude, val.Geometry.Longitude);
+                bounds.extend(myLatlng);
+                var image = val.Geometry.Imagen != null ? 'Images/' + val.Geometry.Imagen : "";
+
+                marker = new google.maps.Marker({
+                    id: val.Geometry.Id,
+                    icon: image,
+                    position: new google.maps.LatLng(val.Geometry.Latitude, val.Geometry.Longitude),
+                    map: map
+                });
+                google.maps.event.addListener(marker, 'click', function () {
+                    map.setZoom(17);
+                    map.panTo(this.getPosition());
+                });
+                google.maps.event.addListener(marker, "dblclick", function (e) {
+                    //log("Double Click");
+                    $.ajax({
+                        type: "POST",
+                        url: "WebService.asmx/ChangeStatus",
+                        data: "{'Id':'" + val.Geometry.Id + "'}",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (msg) {
+                           // alert("Success: " + msg);
+                        },
+                        error: function (msg) {
+                            alert("Failed: " + msg.status + ": " + msg.statusText);
+                        }  
+                    });
+                });
+
+                /*var color;
+                if (val.Geometry.Status == 0)
+                color = "#DF0101";
+                else
+                color = "#99CC00";
+                var cirulo = new google.maps.Circle({
+                center: new google.maps.LatLng(val.Geometry.Latitude, val.Geometry.Longitude),
+                radius: 500,
+                strokeColor: color, //Dependiendo de statu
+                strokeOpacity: 1,
+                fillColor: color,
+                fillOpacity: 0.85,
+                map: map
+                });
+                geo.push(cirulo);
+                */
+                markers.push(marker);
+
+            });
+            map.fitBounds(bounds);
+            console.log(jsonObj);
+            //document.cookie = "jsonCookie=" + JSON.stringify(jsonObj);
+
+        }
         function createJSON(values) {
             var jsonObj = [];
             var mapOptions = {
@@ -229,7 +311,8 @@
                 item["Geometry"]["Latitude"] = ide.Latitude;
                 item["Geometry"]["Longitude"] = ide.Longitude;
                 item["Geometry"]["Id"] = ide.ID_MU;
-
+                item["Geometry"]["Imagen"] = ide.Imagen;
+                item["Geometry"]["Status"] = ide.Status;
                 jsonObj.push(item);
 
             });
@@ -239,9 +322,11 @@
             jQuery.each(jsonObj, function (key, val) {
                 var myLatlng = new window.google.maps.LatLng(val.Geometry.Latitude, val.Geometry.Longitude);
                 bounds.extend(myLatlng);
+                var image = val.Geometry.Imagen != null ? 'Images/' + val.Geometry.Imagen : "";
 
                 marker = new google.maps.Marker({
                     id: val.Geometry.Id,
+                    icon: image,
                     position: new google.maps.LatLng(val.Geometry.Latitude, val.Geometry.Longitude),
                     map: map
                 });
